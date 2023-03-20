@@ -3,7 +3,7 @@ name: Deploy serverless todo app
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:

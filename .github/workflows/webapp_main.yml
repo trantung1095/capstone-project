@@ -3,7 +3,7 @@ name: Build and upload Todo WebApp
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   Deploy:
