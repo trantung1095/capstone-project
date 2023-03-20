@@ -13,7 +13,6 @@ import {
   Loader,
   Select,
   Container,
-  Item,
   Table,
   Image
 } from 'semantic-ui-react'
