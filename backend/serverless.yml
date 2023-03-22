@@ -27,7 +27,7 @@ provider:
     TODOS_TABLE: Todos-sls-${self:provider.stage}
     TODOS_CREATED_AT_INDEX: CreatedAtIndex
     TODOS_DUE_DATE_INDEX: DueDateIndex
-    ATTACHMENT_S3_BUCKET: trantung-serverless-app-todo-images-${self:provider.stage}
+    ATTACHMENT_S3_BUCKET: trantung-capstone-project-images-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
 
   logs:
