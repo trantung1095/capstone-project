@@ -1,6 +1,6 @@
 org: tungtran
-app: capstone-project
-service: capstone-project
+app: serverless-todo-app
+service: serverless-todo-app
 
 plugins:
   - serverless-webpack
@@ -39,8 +39,8 @@ custom:
     api:
       info:
         version: v1.0.0
-        title: Capstone Project API
-        description: Capstone project for todos
+        title: Serverless Application Todo API
+        description: Serverless application for todos
     models:
       - name: CreateTodoRequest
         contentType: application/json
