@@ -57,6 +57,25 @@ export async function deleteTodo(todoId: string, userId: string) {
   await todoAccess.deleteTodo(todoId, userId)
 }
 
+export async function deleteImageTodo(todoId: string, userId: string) {
+  logger.info('Check delete image todo')
+
+  const toDo = await todoAccess.getTodo(todoId, userId)
+  logger.info(toDo)
+
+  if (
+    toDo.imageId !== undefined &&
+    toDo.imageId !== null &&
+    toDo.imageId !== ''
+  ) {
+    logger.info('Delete image todo')
+
+    // Delete old image
+    await attachmentUtils.deleteImageFile(toDo.imageId)
+    await todoAccess.updateImageSourceToDo(todoId, userId, '')
+  }
+}
+
 export async function createAttachmentPresignedUrl(
   todoId: string,
   userId: string

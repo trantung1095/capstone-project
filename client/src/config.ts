@@ -7,6 +7,5 @@ export const authConfig = {
   // domain: 'dev-nd9990-p4.us.auth0.com',
   domain: 'dev-0zlqjaggqu314b68.us.auth0.com', // Auth0 domain
   clientId: '4DRem3OtLrSpEZeOCWGAorJbVY4DU9Vl', // Auth0 client id
-  callbackUrl:
-    'http://trantung-capstone-project.s3-website-us-east-1.amazonaws.com/callback'
+  callbackUrl: 'http://localhost:3000/callback'
 }

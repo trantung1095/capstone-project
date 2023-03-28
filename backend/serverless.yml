@@ -1,6 +1,6 @@
 org: tungtran
-app: serverless-todo-app
-service: serverless-todo-app
+app: capstone-project
+service: capstone-project
 
 plugins:
   - serverless-webpack
@@ -39,8 +39,8 @@ custom:
     api:
       info:
         version: v1.0.0
-        title: Serverless Application Todo API
-        description: Serverless application for todos
+        title: Capstone Project API
+        description: Capstone project for todos
     models:
       - name: CreateTodoRequest
         contentType: application/json
@@ -185,6 +185,56 @@ functions:
         Resource:
           - '*'
 
+  DeleteImage:
+    handler: src/lambda/http/deleteImage.handler
+    events:
+      - http:
+          method: delete
+          path: image/{todoId}
+          cors: true
+          authorizer: Auth
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+          - dynamodb:Query
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+          - s3:GetObject
+          - s3:DeleteObject
+        Resource: 'arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*'
+      - Effect: Allow
+        Action:
+          - xray:PutTraceSegments
+          - xray:PutTelemetryRecords
+        Resource:
+          - '*'
+
+  ResizeImage:
+    handler: src/lambda/s3/resizeImage.handler
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+          - s3:PutObject
+          - s3:DeleteObject
+        Resource: 'arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*'
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+          - dynamodb:Query
+          - dynamodb:Scan
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+
   # TODO: Configure this function
   # Provide property for setting up CORS, Authorizer, iamRoleStatements
   GenerateUploadUrl:
@@ -292,6 +342,11 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:provider.environment.ATTACHMENT_S3_BUCKET}
+        NotificationConfiguration:
+          LambdaConfigurations:
+            - Event: s3:ObjectCreated:*
+              Function: !GetAtt ResizeImageLambdaFunction.Arn
+        AccessControl: PublicRead
         CorsConfiguration:
           CorsRules:
             - AllowedOrigins:
@@ -305,6 +360,15 @@ resources:
                 - DELETE
                 - HEAD
               MaxAge: 3000
+
+    ResizeImagePermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        FunctionName: !Ref ResizeImageLambdaFunction
+        Principal: 's3.amazonaws.com'
+        Action: lambda:InvokeFunction
+        SourceAccount: !Ref AWS::AccountId
+        SourceArn: arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}
 
     # TODO: Complete the policy below and attach it to the bucket defined above
     # For cross referencing the name of the bucket, use "!Ref AttachmentsBucket"

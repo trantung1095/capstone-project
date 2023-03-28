@@ -22,6 +22,7 @@ import Auth from '../auth/Auth'
 import { GetTodosRequest } from '../types/GetTodosRequest'
 import { Todo } from '../types/Todo'
 import defaultImage from '../assets/images/default-image.jpeg'
+import { PopupEditTodo } from './PopupEditTodo'
 
 interface TodosProps {
   auth: Auth
@@ -34,6 +35,8 @@ interface TodosState {
   loadingTodos: boolean
   param: GetTodosRequest
   nextKeyList: string[]
+  editItem: Todo
+  openEditPopup: boolean
 }
 
 const LIMIT_OPTIONS = [
@@ -51,7 +54,9 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       nextKey: '',
       limit: 5
     },
-    nextKeyList: []
+    nextKeyList: [],
+    editItem: {} as Todo,
+    openEditPopup: false
   }
 
   username = localStorage
@@ -63,8 +68,13 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     this.setState({ newTodoName: event.target.value })
   }
 
-  handleEditButtonClick = (todoId: string) => {
-    this.props.history.push(`/todos/${todoId}/edit`)
+  handleEditButtonClick = (todo: Todo) => {
+    console.log('Edit to do,', todo)
+    this.setState({ editItem: todo, openEditPopup: true })
+  }
+
+  handleToggleEditPopup(openEditPopup: boolean) {
+    this.setState({ openEditPopup })
   }
 
   handleTodoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
@@ -110,7 +120,8 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       await patchTodo(this.props.auth.getIdToken(), todo.todoId, {
         name: todo.name,
         dueDate: todo.dueDate,
-        done: !todo.done
+        done: !todo.done,
+        uploadImage: false
       })
       this.setState({
         todos: update(this.state.todos, {
@@ -194,6 +205,18 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         {this.renderCreateTodoInput()}
         {this.renderTodos()}
         {this.renderPaginator()}
+        {this.state.openEditPopup && (
+          <PopupEditTodo
+            display={this.state.openEditPopup}
+            closeFunction={() => {
+              this.handleToggleEditPopup(false)
+              this.setState({ loadingTodos: true })
+              this.getTodos()
+            }}
+            item={this.state.editItem}
+            auth={this.props.auth}
+          />
+        )}
       </div>
     )
   }
@@ -300,7 +323,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
             <Button
               icon
               color="blue"
-              onClick={() => this.handleEditButtonClick(todo.todoId)}
+              onClick={() => this.handleEditButtonClick(todo)}
             >
               <Icon name="pencil" />
             </Button>

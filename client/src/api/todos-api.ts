@@ -45,8 +45,8 @@ export async function patchTodo(
   idToken: string,
   todoId: string,
   updatedTodo: UpdateTodoRequest
-): Promise<void> {
-  await Axios.patch(
+): Promise<string> {
+  const response = await Axios.patch(
     `${apiEndpoint}/todos/${todoId}`,
     JSON.stringify(updatedTodo),
     {
@@ -56,6 +56,7 @@ export async function patchTodo(
       }
     }
   )
+  return response.data.uploadUrl
 }
 
 export async function deleteTodo(
@@ -92,4 +93,16 @@ export async function uploadFile(
   file: Buffer
 ): Promise<void> {
   await Axios.put(uploadUrl, file)
+}
+
+export async function deleteImage(
+  idToken: string,
+  todoId: string
+): Promise<void> {
+  await Axios.delete(`${apiEndpoint}/image/${todoId}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${idToken}`
+    }
+  })
 }
