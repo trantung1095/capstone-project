@@ -24,7 +24,7 @@ provider:
   # Use these variables in the functions and resources section below. For example,
   # ${self:provider.environment.ATTACHMENT_S3_BUCKET}
   environment:
-    TODOS_TABLE: Todos-slss-${self:provider.stage}
+    TODOS_TABLE: Todos-sls-${self:provider.stage}
     TODOS_CREATED_AT_INDEX: CreatedAtIndex
     TODOS_DUE_DATE_INDEX: DueDateIndex
     ATTACHMENT_S3_BUCKET: trantung-capstone-project-images-${self:provider.stage}
