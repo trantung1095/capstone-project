@@ -80,12 +80,14 @@ export async function createAttachmentPresignedUrl(
   todoId: string,
   userId: string
 ): Promise<string> {
-  logger.info('Create attachment presigned url')
+  logger.info('create attachment presigned url')
 
-  const dbUrl: string = `https://${process.env.ATTACHMENT_S3_BUCKET}.s3.amazonaws.com/${todoId}`
-  const attachmentUrl: string = attachmentUtils.getSignedUrl(todoId)
+  // Random image id
+  const imageId = uuidv4()
 
-  await todoAccess.updateAttachmentForTodo(todoId, userId, dbUrl)
+  // Save to db
+  await todoAccess.updateImageSourceToDo(todoId, userId, imageId)
 
-  return attachmentUrl
+  // Get upload url
+  return await attachmentUtils.getSignedUrl(imageId)
 }
