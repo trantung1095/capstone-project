@@ -142,19 +142,26 @@ functions:
           method: patch
           path: todos/{todoId}
           cors: true
-          authorizer: Auth
           reqValidatorName: RequestBodyValidator
-          documentation:
-            summary: Update todo
-            description: Update todo
-            requestModels:
-              'application/json': UpdateTodoRequest
-    iamRoleStatementsName: serverless-update-todo-role-${self:provider.stage}
+          authorizer: Auth
+          request:
+            schemas:
+              application/json: ${file(models/update-todo-model.json)}
+    iamRoleStatementsInherit: true
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - dynamodb:PutItem
+          - dynamodb:GetItem
           - dynamodb:UpdateItem
+          - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+          - s3:GetObject
+          - s3:DeleteObject
+        Resource: 'arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*'
       - Effect: Allow
         Action:
           - xray:PutTraceSegments
