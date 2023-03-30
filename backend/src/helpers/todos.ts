@@ -44,11 +44,16 @@ export async function createTodo(
 export async function updateTodo(
   todoId: string,
   userId: string,
-  UpdateTodoRequest: UpdateTodoRequest
+  model: UpdateTodoRequest
 ) {
-  logger.info(`Update todo for user: ${userId}`)
+  logger.info('Update todo id')
 
-  await todoAccess.updateTodo(todoId, userId, UpdateTodoRequest)
+  // Check if update image, delete old image
+  if (model.uploadImage) {
+    await deleteImageTodo(todoId, userId)
+  }
+
+  await todoAccess.updateTodo(todoId, userId, model)
 }
 
 export async function deleteTodo(todoId: string, userId: string) {

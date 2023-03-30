@@ -122,30 +122,28 @@ export class TodosAccess {
   async updateTodo(
     todoId: string,
     userId: string,
-    model: TodoUpdate
-  ): Promise<TodoItem> {
-    logger.debug('Update todo')
+    data: TodoUpdate
+  ): Promise<TodoUpdate> {
+    logger.info('Update todo')
 
-    const params = {
-      TableName: this.todosTable,
-      Key: {
-        todoId: todoId,
-        userId: userId
-      },
-      UpdateExpression:
-        'set #todoName = :todoName, dueDate = :dueDate, done = :done',
-      ExpressionAttributeNames: { '#todoName': 'name' },
-      ExpressionAttributeValues: {
-        ':todoName': model.name,
-        ':dueDate': model.dueDate,
-        ':done': model.done
-      },
-      ReturnValues: 'ALL_NEW'
-    }
+    await docClient
+      .update({
+        TableName: this.todosTable,
+        Key: {
+          todoId: todoId,
+          userId: userId
+        },
+        UpdateExpression: 'set #n = :n, dueDate = :dueDate, done = :done',
+        ExpressionAttributeValues: {
+          ':n': data.name,
+          ':dueDate': data.dueDate,
+          ':done': data.done
+        },
+        ExpressionAttributeNames: { '#n': 'name' }
+      })
+      .promise()
 
-    const result = await docClient.update(params).promise()
-
-    return result.Attributes as TodoItem
+    return data
   }
 
   async deleteTodo(todoId: string, userId: string): Promise<any> {
@@ -160,30 +158,5 @@ export class TodosAccess {
     }
 
     return await docClient.delete(params).promise()
-  }
-
-  async updateAttachmentForTodo(
-    todoId: string,
-    userId: string,
-    attachmentUrl: string
-  ): Promise<TodoItem> {
-    logger.debug('Update attachment')
-
-    const params = {
-      TableName: this.todosTable,
-      Key: {
-        todoId: todoId,
-        userId: userId
-      },
-      UpdateExpression: 'set attachmentUrl = :url',
-      ExpressionAttributeValues: {
-        ':url': attachmentUrl
-      },
-      ReturnValues: 'ALL_NEW'
-    }
-
-    const result = await docClient.update(params).promise()
-
-    return result.Attributes as TodoItem
   }
 }

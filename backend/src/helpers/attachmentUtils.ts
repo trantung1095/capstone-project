@@ -6,19 +6,22 @@ const XAWS = AWSXRay.captureAWS(AWS)
 
 // TODO: Implement the fileStogare logic
 export class AttachmentUtils {
-  constructor(private readonly s3 = new XAWS.S3({ signatureVersion: 'v4' })) {}
+  constructor(
+    private readonly s3 = new XAWS.S3({
+      signatureVersion: 'v4'
+    })
+  ) {}
 
   async getSignedUrl(imageId: string) {
-    const signedUrl = this.s3.getSignedUrl('putObject', {
+    return this.s3.getSignedUrl('putObject', {
       Bucket: process.env.ATTACHMENT_S3_BUCKET,
       Key: imageId + '.png',
       Expires: Number(process.env.SIGNED_URL_EXPIRATION)
     })
-
-    return signedUrl as string
   }
 
   async deleteImageFile(imageId: string) {
+    // Ref: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#deleteObject-property
     await this.s3
       .deleteObject({
         Bucket: process.env.ATTACHMENT_S3_BUCKET,
@@ -27,6 +30,7 @@ export class AttachmentUtils {
       .promise()
   }
 
+  // Ref: udacity lession 4
   async resizeImage(imageKey: string) {
     const response = await this.s3
       .getObject({
