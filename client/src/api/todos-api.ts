@@ -99,6 +99,8 @@ export async function deleteImage(
   idToken: string,
   todoId: string
 ): Promise<void> {
+  console.log('call')
+
   await Axios.delete(`${apiEndpoint}/image/${todoId}`, {
     headers: {
       'Content-Type': 'application/json',

@@ -209,7 +209,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
           <PopupEditTodo
             display={this.state.openEditPopup}
             closeFunction={() => {
-              this.handleToggleEditPopup(false)
+              // this.handleToggleEditPopup(false)
               this.setState({ loadingTodos: true })
               this.getTodos()
             }}
