@@ -4,41 +4,48 @@ import { TodoItem } from '../models/TodoItem'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import { createLogger } from '../utils/logger'
+import { v4 as uuidv4 } from 'uuid'
+import { TodoPagination } from '../models/TodoPagination'
 
-const logger = createLogger('todos')
 const todoAccess = new TodosAccess()
 const attachmentUtils = new AttachmentUtils()
+const logger = createLogger('todos')
 
-import { v4 as uuidv4 } from 'uuid'
-import { GetTodosResponse } from '../models/GetTodoResponse'
+export async function createTodo(
+  model: CreateTodoRequest,
+  userId: string
+): Promise<TodoItem> {
+  logger.info('Create to do user id', userId)
+
+  const todoId = uuidv4()
+  const createdDate = new Date().toISOString()
+  const newItem = {} as TodoItem
+  newItem.todoId = todoId
+  newItem.createdAt = createdDate
+  newItem.done = false
+  newItem.userId = userId
+  newItem.name = model.name
+  newItem.dueDate = model.dueDate
+
+  return await todoAccess.createTodo(newItem)
+}
 
 export async function getTodosForUser(
   userId: string,
-  nextKey: any,
   limit: number,
-  orderBy: string
-): Promise<GetTodosResponse> {
-  logger.info(`Get todo for user: ${userId}`)
+  key: any
+): Promise<TodoPagination> {
+  logger.info('Get to do user id', userId)
 
-  return await todoAccess.getTodos(userId, nextKey, limit, orderBy)
+  return await todoAccess.getTodos(userId, limit, key)
 }
 
-// TODO: Implement businessLogic
-export async function createTodo(
-  createTodoRequest: CreateTodoRequest,
-  userId: string
-): Promise<TodoItem> {
-  logger.info(`Create todo for user: ${userId}`)
+export async function deleteTodo(todoId: string, userId: string) {
+  logger.info('Delete todo id')
+  logger.info(todoId)
 
-  const newItem: TodoItem = {} as TodoItem
-  newItem.userId = userId
-  newItem.todoId = uuidv4()
-  newItem.createdAt = new Date().toISOString()
-  newItem.name = createTodoRequest.name
-  newItem.dueDate = createTodoRequest.dueDate
-  newItem.done = false
-
-  return await todoAccess.createTodo(newItem)
+  await deleteImageTodo(todoId, userId)
+  await todoAccess.deleteTodo(todoId, userId)
 }
 
 export async function updateTodo(
@@ -54,12 +61,6 @@ export async function updateTodo(
   }
 
   await todoAccess.updateTodo(todoId, userId, model)
-}
-
-export async function deleteTodo(todoId: string, userId: string) {
-  logger.info(`Delete todo for user: ${userId}`)
-
-  await todoAccess.deleteTodo(todoId, userId)
 }
 
 export async function deleteImageTodo(todoId: string, userId: string) {
