@@ -34,6 +34,14 @@ provider:
     # Enable API Gateway logs
     restApi: true
 
+custom:
+  documentation:
+    api:
+      info:
+        version: v1.0.0
+        title: Serverless Application Todo API
+        description: Serverless application for todos
+
 functions:
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
