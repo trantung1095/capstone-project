@@ -60,7 +60,9 @@ export async function updateTodo(
     await deleteImageTodo(todoId, userId)
   }
 
-  await todoAccess.updateTodo(todoId, userId, model)
+  const { uploadImage: _, ...updatedTodo } = model
+
+  await todoAccess.updateTodo(todoId, userId, updatedTodo)
 }
 
 export async function deleteImageTodo(todoId: string, userId: string) {
