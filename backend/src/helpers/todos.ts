@@ -56,7 +56,7 @@ export async function updateTodo(
   logger.info('Update todo id')
 
   // Check if update image, delete old image
-  if (model.uploadImage) {
+  if (model.isUpdateImage) {
     await deleteImageTodo(todoId, userId)
   }
 

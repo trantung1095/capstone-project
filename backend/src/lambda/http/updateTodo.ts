@@ -19,7 +19,7 @@ export const handler = middy(
 
     // If user submit image, return presigned url
     var uploadUrl: string = ''
-    if (updatedTodo.uploadImage === true) {
+    if (updatedTodo.isUpdateImage === true) {
       uploadUrl = await createAttachmentPresignedUrl(todoId, userId)
     }
 

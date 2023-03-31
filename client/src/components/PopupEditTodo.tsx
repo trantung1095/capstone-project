@@ -81,7 +81,7 @@ export class PopupEditTodo extends React.PureComponent<
         name: this.state.name,
         dueDate: this.state.dueDate,
         done: this.state.done,
-        uploadImage: this.state.file !== undefined
+        isUpdateImage: this.state.file !== undefined
       }
 
       console.log('Patch API Todo', updateModel)
@@ -97,6 +97,8 @@ export class PopupEditTodo extends React.PureComponent<
       if (this.state.file) {
         this.setUploadState(UploadState.UploadingFile)
         await uploadFile(uploadUrl, this.state.file)
+      } else {
+        console.log('halo')
       }
 
       alert('Save success!')

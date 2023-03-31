@@ -24,6 +24,13 @@ import { Todo } from '../types/Todo'
 import defaultImage from '../assets/images/default-image.jpeg'
 import { PopupEditTodo } from './PopupEditTodo'
 
+const LIMIT_OPTIONS = [
+  { key: '3', value: 3, text: '3 items per page' },
+  { key: '6', value: 6, text: '6 items per page' },
+  { key: '12', value: 12, text: '12 items per page' },
+  { key: '24', value: 24, text: '24 items per page' }
+]
+
 interface TodosProps {
   auth: Auth
   history: History
@@ -33,30 +40,25 @@ interface TodosState {
   todos: Todo[]
   newTodoName: string
   loadingTodos: boolean
-  param: GetTodosRequest
-  nextKeyList: string[]
-  editItem: Todo
   openEditPopup: boolean
+  editItem: Todo
+  nextKey: string
+  limit: number
+  nextKeyList: string[]
+  currentKey: string
 }
-
-const LIMIT_OPTIONS = [
-  { key: '5', value: 5, text: '5 items per page' },
-  { key: '10', value: 10, text: '10 items per page' },
-  { key: '15', value: 15, text: '15 items per page' }
-]
 
 export class Todos extends React.PureComponent<TodosProps, TodosState> {
   state: TodosState = {
     todos: [],
     newTodoName: '',
     loadingTodos: true,
-    param: {
-      nextKey: '',
-      limit: 5
-    },
-    nextKeyList: [],
+    openEditPopup: false,
     editItem: {} as Todo,
-    openEditPopup: false
+    nextKey: '',
+    limit: 6,
+    nextKeyList: [],
+    currentKey: ''
   }
 
   username = localStorage
@@ -64,50 +66,64 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     ?.replace(/['"]+/g, '')
     .toUpperCase()
 
-  handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ newTodoName: event.target.value })
-  }
-
-  handleEditButtonClick = (todo: Todo) => {
-    console.log('Edit to do,', todo)
-    this.setState({ editItem: todo, openEditPopup: true })
+  setLimit(limit: number) {
+    this.setState({ nextKeyList: [], limit, nextKey: '' })
+    this.getTodos(limit, '')
   }
 
   handleToggleEditPopup(openEditPopup: boolean) {
     this.setState({ openEditPopup })
   }
 
-  handleTodoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
+  onClickNextButton() {
+    console.log('Next button', this.state.nextKeyList)
+    var nextKeyList = this.state.nextKeyList
+    nextKeyList.push(this.state.currentKey)
+    this.setState({ nextKeyList })
+
+    this.getTodos(this.state.limit, this.state.nextKey)
+  }
+
+  onClickPrevButton() {
+    var nextKeyList = this.state.nextKeyList
+    var preKey = nextKeyList.pop()
+    this.setState({ nextKeyList })
+
+    this.getTodos(this.state.limit, preKey)
+  }
+
+  handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ newTodoName: event.target.value })
+  }
+
+  onEditButtonClick = (todo: Todo) => {
+    console.log('Edit to do,', todo)
+    this.setState({ editItem: todo, openEditPopup: true })
+  }
+
+  handleCreateTodo = async (event: React.ChangeEvent<HTMLButtonElement>) => {
     try {
       const dueDate = this.calculateDueDate()
-      await createTodo(this.props.auth.getIdToken(), {
+      const newTodo = await createTodo(this.props.auth.getIdToken(), {
         name: this.state.newTodoName,
         dueDate
       })
       this.setState({
-        loadingTodos: true,
-        newTodoName: '',
-        nextKeyList: [],
-        param: {
-          ...this.state.param,
-          nextKey: ''
-        }
+        todos: [...this.state.todos, newTodo],
+        newTodoName: ''
       })
     } catch {
       alert('Todo creation failed')
     }
   }
 
-  handleTodoDelete = async (todoId: string) => {
+  handleDeleteTodo = async (todoId: string) => {
     try {
+      if (!window.confirm('Do you want to delete this todo?')) return
+
       await deleteTodo(this.props.auth.getIdToken(), todoId)
       this.setState({
-        loadingTodos: true,
-        nextKeyList: [],
-        param: {
-          ...this.state.param,
-          nextKey: ''
-        }
+        todos: this.state.todos.filter((todo) => todo.todoId !== todoId)
       })
     } catch {
       alert('Todo deletion failed')
@@ -121,7 +137,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         name: todo.name,
         dueDate: todo.dueDate,
         done: !todo.done,
-        uploadImage: false
+        isUpdateImage: false // Default is false
       })
       this.setState({
         todos: update(this.state.todos, {
@@ -133,48 +149,29 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     }
   }
 
-  handleClickNextButton() {
-    this.state.nextKeyList.push(this.state.param.nextKey)
-    this.setState({ loadingTodos: true })
-  }
-
-  handleClickPreviousButton() {
-    this.state.nextKeyList.pop()
-    this.setState({
-      param: {
-        ...this.state.param,
-        nextKey: this.state.nextKeyList.at(-1) || ''
-      },
-      loadingTodos: true
-    })
-  }
-
-  onChangeLimit = (newLimit: number) => {
-    this.setState({
-      loadingTodos: true,
-      nextKeyList: [],
-      param: {
-        ...this.state.param,
-        limit: newLimit,
-        nextKey: ''
-      }
-    })
-  }
-
-  async getTodos() {
+  async getTodos(limit?: number, nextKey?: string) {
     try {
+      if (limit === undefined || limit === null) {
+        limit = this.state.limit
+      }
+      if (nextKey === undefined || nextKey === null) {
+        nextKey = ''
+      }
+
+      this.setState({
+        loadingTodos: true,
+        currentKey: nextKey
+      })
+
       const result = await getTodos(
         this.props.auth.getIdToken(),
-        this.state.param
+        limit,
+        nextKey
       )
-      console.log(result)
 
       this.setState({
         todos: result.items,
-        param: {
-          ...this.state.param,
-          nextKey: result.nextKey ?? ''
-        },
+        nextKey: result.nextKey ?? '',
         loadingTodos: false
       })
     } catch (e) {
@@ -196,8 +193,6 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   }
 
   render() {
-    console.log(this.state.param)
-    console.log(this.state.nextKeyList)
     return (
       <div>
         <Header as="h1">{this.username} todos</Header>
@@ -209,7 +204,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
           <PopupEditTodo
             display={this.state.openEditPopup}
             closeFunction={() => {
-              // this.handleToggleEditPopup(false)
+              this.handleToggleEditPopup(false)
               this.setState({ loadingTodos: true })
               this.getTodos()
             }}
@@ -230,7 +225,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
           icon="left arrow"
           labelPosition="left"
           loading={this.state.loadingTodos}
-          onClick={() => this.handleClickPreviousButton()}
+          onClick={() => this.onClickPrevButton()}
           disabled={this.state.nextKeyList.length === 0}
         />
         <Button
@@ -239,17 +234,15 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
           icon="right arrow"
           labelPosition="right"
           loading={this.state.loadingTodos}
-          onClick={() => this.handleClickNextButton()}
-          disabled={
-            this.state.param.nextKey === null || this.state.param.nextKey === ''
-          }
+          onClick={() => this.onClickNextButton()}
+          disabled={this.state.nextKeyList.length === 0}
         />
         <Select
           placeholder="Page size"
           style={{ marginRight: '10px' }}
           options={LIMIT_OPTIONS}
-          value={this.state.param.limit}
-          onChange={(e, data) => this.onChangeLimit(Number(data.value))}
+          value={this.state.limit}
+          onChange={(e, data) => this.setLimit(Number(data.value))}
         />
       </Container>
     )
@@ -265,7 +258,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
               labelPosition: 'left',
               icon: 'add',
               content: 'New task',
-              onClick: this.handleTodoCreate
+              onClick: this.handleCreateTodo
             }}
             fluid
             actionPosition="left"
@@ -323,14 +316,14 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
             <Button
               icon
               color="blue"
-              onClick={() => this.handleEditButtonClick(todo)}
+              onClick={() => this.onEditButtonClick(todo)}
             >
               <Icon name="pencil" />
             </Button>
             <Button
               icon
               color="red"
-              onClick={() => this.handleTodoDelete(todo.todoId)}
+              onClick={() => this.handleDeleteTodo(todo.todoId)}
             >
               <Icon name="delete" />
             </Button>

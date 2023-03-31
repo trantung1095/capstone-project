@@ -2,5 +2,5 @@ export interface TodoUpdate {
   name: string
   dueDate: string
   done: boolean
-  uploadImage: boolean
+  isUpdateImage: boolean
 }

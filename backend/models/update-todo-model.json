@@ -13,7 +13,7 @@
     "done": {
       "type": "boolean"
     },
-    "uploadImage": {
+    "isUpdateImage": {
       "type": "boolean"
     }
   },

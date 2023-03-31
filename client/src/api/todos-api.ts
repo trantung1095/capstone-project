@@ -3,24 +3,23 @@ import { Todo } from '../types/Todo'
 import { CreateTodoRequest } from '../types/CreateTodoRequest'
 import Axios from 'axios'
 import { UpdateTodoRequest } from '../types/UpdateTodoRequest'
-import { GetTodosRequest } from '../types/GetTodosRequest'
-import { GetTodosResponse } from '../types/GetTodosResponse'
+import { TodoPagination } from '../types/TodoPagination'
 
 export async function getTodos(
   idToken: string,
-  request: GetTodosRequest
-): Promise<GetTodosResponse> {
-  const response = await Axios.get(`${apiEndpoint}/todos`, {
+  limit: number,
+  nextKey: string
+): Promise<TodoPagination> {
+  const response = await Axios.get<TodoPagination>(`${apiEndpoint}/todos`, {
     params: {
-      limit: request.limit,
-      nextKey: request.nextKey
+      limit: limit,
+      nextKey: nextKey
     },
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${idToken}`
     }
   })
-
   return response.data
 }
 
@@ -99,8 +98,6 @@ export async function deleteImage(
   idToken: string,
   todoId: string
 ): Promise<void> {
-  console.log('call')
-
   await Axios.delete(`${apiEndpoint}/image/${todoId}`, {
     headers: {
       'Content-Type': 'application/json',
