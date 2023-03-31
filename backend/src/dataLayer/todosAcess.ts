@@ -4,7 +4,7 @@ import { createLogger } from '../utils/logger'
 import { TodoItem } from '../models/TodoItem'
 import { TodoUpdate } from '../models/TodoUpdate'
 import { TodoPagination } from '../models/TodoPagination'
-import { encodeNextKey } from './utils'
+import { encodeNextKey } from '../lambda/utils'
 const AWSXRay = require('aws-xray-sdk')
 
 const XAWS = AWSXRay.captureAWS(AWS)

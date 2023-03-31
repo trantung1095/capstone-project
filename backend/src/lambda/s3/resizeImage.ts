@@ -1,7 +1,7 @@
 import { S3Handler, S3Event } from 'aws-lambda'
 import 'source-map-support/register'
 import { AttachmentUtils } from '../../helpers/attachmentUtils'
-import { TodosAccess } from '../../helpers/todosAcess'
+import { TodosAccess } from '../../dataLayer/todosAcess'
 import { createLogger } from '../../utils/logger'
 const logger = createLogger('resizeImage')
 const attachmentUtils = new AttachmentUtils()

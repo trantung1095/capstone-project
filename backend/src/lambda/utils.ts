@@ -84,3 +84,11 @@ export function parseNextKeyParameter(event: APIGatewayProxyEvent): any {
   const uriDecoded = decodeURIComponent(nextKeyStr)
   return JSON.parse(uriDecoded)
 }
+
+export function encodeNextKey(lastEvaluatedKey: any): string {
+  if (!lastEvaluatedKey) {
+    return null
+  }
+
+  return encodeURIComponent(JSON.stringify(lastEvaluatedKey))
+}

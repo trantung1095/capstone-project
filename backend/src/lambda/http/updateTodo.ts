@@ -4,7 +4,10 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors, httpErrorHandler } from 'middy/middlewares'
 
-import { createAttachmentPresignedUrl, updateTodo } from '../../helpers/todos'
+import {
+  createAttachmentPresignedUrl,
+  updateTodo
+} from '../../businessLogic/todos'
 import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
 import { getUserId } from '../utils'
 
