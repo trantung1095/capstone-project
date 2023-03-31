@@ -60,7 +60,8 @@ export async function updateTodo(
     await deleteImageTodo(todoId, userId)
   }
 
-  const { uploadImage: _, ...updatedTodo } = model
+  const updatedTodo = Object.assign({}, model)
+  delete updatedTodo.uploadImage
 
   await todoAccess.updateTodo(todoId, userId, updatedTodo)
 }
