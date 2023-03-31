@@ -24,6 +24,14 @@ Apply pagination for application for FE and BE with what i have learned from les
 
 Add an ability to sort TODOs by created date or due date (created date by default)
 
+### Delete
+
+Add an ability to delete image
+
+### Update
+
+Add an ability to update todo ( name, image...)
+
 ## Screenshots folder
 
 In this repo, I also created images/screenshots for the screenshots related to CI/CD, deploy, resource.

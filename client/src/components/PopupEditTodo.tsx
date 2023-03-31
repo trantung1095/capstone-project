@@ -122,7 +122,14 @@ export class PopupEditTodo extends React.PureComponent<
         onClose={() => this.props.closeFunction()}
         open={this.props.display}
       >
-        <Modal.Header>Edit todo</Modal.Header>
+        <Modal.Header
+          style={{
+            backgroundColor: '#3498db',
+            color: '#fff'
+          }}
+        >
+          Edit todo
+        </Modal.Header>
         <Modal.Content image>
           {this.props.item && this.props.item.attachmentUrl && (
             <div style={{ margin: '20px' }}>
