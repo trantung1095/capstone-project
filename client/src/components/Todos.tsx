@@ -19,7 +19,6 @@ import {
 
 import { createTodo, deleteTodo, getTodos, patchTodo } from '../api/todos-api'
 import Auth from '../auth/Auth'
-import { GetTodosRequest } from '../types/GetTodosRequest'
 import { Todo } from '../types/Todo'
 import defaultImage from '../assets/images/default-image.jpeg'
 import { PopupEditTodo } from './PopupEditTodo'
